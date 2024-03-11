@@ -20,6 +20,7 @@ import cv2
 from typing import NamedTuple, Optional, List, Tuple
 from scipy.special import softmax
 from utils.graphics_utils import getWorld2View2
+from utils.console_utils import *
 
 WARNED = False
 
@@ -59,10 +60,8 @@ def loadCam(args,
                 global_down = 1
         else:
             global_down = orig_w / args.resolution
-
         scale = float(global_down) * float(resolution_scale)
         resolution = (int(orig_w / scale), int(orig_h / scale))
-
     resized_image_rgb = PILtoTorch(cam_info.image, resolution)
 
     gt_image = resized_image_rgb[:3, ...]
@@ -99,7 +98,7 @@ def cameraList_from_camInfos(cam_infos, resolution_scale, args, mode="test"):
         camera_list.append(loadCam(args, id, c, resolution_scale, mode))
 
     return camera_list
-
+#这里应该是CameraInfo的列表
 def camera_to_JSON(id, camera : Camera):
     Rt = np.zeros((4, 4))
     Rt[:3, :3] = camera.R.transpose()

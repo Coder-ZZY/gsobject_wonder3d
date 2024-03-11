@@ -14,7 +14,8 @@ from torch.nn import functional as F
 import copy
 from typing import NamedTuple
 from torchvision import transforms
-
+import torchvision,json
+from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON
 class SceneInfo(NamedTuple):
     Ks: list
     Ts: list
@@ -173,8 +174,14 @@ if __name__=="__main__":
 
     # load the camera parameters
     # we assume that the camera parameters are stored in the data_dir
-    scene_info = sceneLoadTypeCallbacks["Colmap"](args.data_dir, 'images', False, extra_opts=extra_opts) 
+    scene_info = sceneLoadTypeCallbacks["Wonder3D"](path = args.data_dir, eval = False, extra_opts=extra_opts) 
     camlist = cameraList_from_camInfos(scene_info.train_cameras, 1.0, extra_opts)
+    # NOTE :this dump use the file name, we dump the SceneInfo.pcd as the input.ply
+    json_cams = []
+    for id, cam in enumerate(camlist):
+        json_cams.append(camera_to_JSON(id, cam))
+    with open(os.path.join("cameras.json"), 'w') as file:
+        json.dump(json_cams, file)
 
     # if sparse id is not zero, we only use given frames to construct the visual hull
     if args.sparse_id >= 0:
@@ -192,7 +199,7 @@ if __name__=="__main__":
     Ks = []
     images = []
     masks = []
-    for cam_info in camlist:
+    for id,cam_info in enumerate(camlist):
         cam_locations.append(cam_info.camera_center)
         cam_rotations.append(cam_info.R)
         cam_T.append(cam_info.T)
@@ -244,7 +251,7 @@ if __name__=="__main__":
     if args.sparse_id >= 0:
         o3d.io.write_point_cloud(os.path.join(args.data_dir, f"visual_hull_{str(args.sparse_id)}.ply"), pcd)
     else:
-        o3d.io.write_point_cloud(os.path.join(args.data_dir, "visual_hull_full.ply"), pcd)
+        o3d.io.write_point_cloud(os.path.join(args.data_dir, "visual_hull.ply"), pcd)
 
     if not args.not_vis:
         Ts = np.array([i.cpu().numpy() for i in Ts])

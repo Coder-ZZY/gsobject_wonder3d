@@ -179,7 +179,7 @@ class GaussianDreamer(BaseLift3DSystem):
         scene_extent: float = 5.0
         min_strength: float = 0.1
         max_strength: float = 1.0
-        novel_image_size: int = 512
+        novel_image_size: int = 256
         refresh_interval: int = 100
         refresh_size: int = 20
         controlnet_num_samples: int = 1
@@ -346,6 +346,7 @@ class GaussianDreamer(BaseLift3DSystem):
 
     def on_fit_start(self) -> None:
         super().on_fit_start()
+        
         self.controlnet = create_model(f'models/{self.cfg.model_name}.yaml').cpu()
         self.controlnet.load_state_dict(load_state_dict('models/v1-5-pruned.ckpt', location='cuda'), strict=False)
         self.controlnet.load_state_dict(load_state_dict(f'models/{self.cfg.model_name}.pth', location='cuda'), strict=False)
@@ -394,7 +395,8 @@ class GaussianDreamer(BaseLift3DSystem):
             'depth': torch.zeros((batch['depth'].shape[0], self.novel_image_size, self.novel_image_size), device=batch['depth'].device),
             'txt': batch['txt']
         }
-
+    
+    #训练
     def training_step(self, batch, batch_idx):
         if self.max_cam_dis == 0.:
             Ts = batch['gt_Ts']

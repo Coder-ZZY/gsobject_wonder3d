@@ -27,6 +27,7 @@ from utils.general_utils import safe_state
 from utils.image_utils import psnr
 from utils.loss_utils import l1_loss, ssim, monodisp
 from torch.utils.tensorboard.writer import SummaryWriter
+import torchvision
 TENSORBOARD_FOUND = True
 
 def training(args, dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from):
@@ -34,6 +35,11 @@ def training(args, dataset, opt, pipe, testing_iterations, saving_iterations, ch
     tb_writer = prepare_output_and_logger(dataset)
     gaussians = GaussianModel(dataset.sh_degree)
     scene = Scene(dataset, gaussians, extra_opts=args)
+    # #save train images
+    # train_cams = scene.getTrainCameras().copy()
+    # for id,cam_info in enumerate(train_cams):
+    #     save_image = torchvision.transforms.ToPILImage()(cam_info.original_image.cpu())
+    #     save_image.save(os.path.join(dataset.source_path,f"train_image_{id}.png"))
     gaussians.training_setup(opt)
     if checkpoint:
         (model_params, first_iter) = torch.load(checkpoint)

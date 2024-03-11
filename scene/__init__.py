@@ -53,6 +53,9 @@ class Scene:
             scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval, extra_opts=extra_opts) # type: ignore
         elif os.path.exists(os.path.join(args.source_path, "hydrant", "frame_annotations.jgz")): # type: ignore
             scene_info = sceneLoadTypeCallbacks["CO3D"](args.source_path, extra_opts=extra_opts) # type: ignore
+        elif "wonder3d" in args.source_path:
+            print("Found wonder3d file, assuming Wonder3D data set!")
+            scene_info = sceneLoadTypeCallbacks["Wonder3D"](args.source_path, args.eval,extra_opts=extra_opts)
         else:
             assert False, "Could not recognize scene type!"
 

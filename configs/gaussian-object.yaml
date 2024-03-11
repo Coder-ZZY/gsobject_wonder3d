@@ -3,7 +3,6 @@ tag: "${rmspace:${system.prompt_processor.prompt},_}"
 use_timestamp: False
 exp_root_dir: "output"
 seed: 0
- 
 data_type: "loo-datamodule"
 dataset_type: "loo-dataset"
 data:
@@ -17,7 +16,7 @@ data:
   length: 4000
   around_gt_steps: 2800
   refresh_interval: 200
-system_type: "gaussian-object-system"
+system_type: "test-system"
 system:
   model_name: "control_v11f1e_sd15_tile"
   exp_name: ""
@@ -59,6 +58,24 @@ system:
       lr: 0.001
       betas: [0.9, 0.99]
       eps: 1.e-15
+  guidance_type: "stable-zero123-guidance"
+  guidance:
+    pretrained_config: "./load/zero123/sd-objaverse-finetune-c_concat-256.yaml"
+    pretrained_model_name_or_path: "./load/zero123/stable_zero123.ckpt"
+    vram_O: ${not:${gt0:${system.freq.guidance_eval}}}
+    # cond_image_path: ${data.image_path}
+    # cond_elevation_deg: ${data.default_elevation_deg}
+    # cond_azimuth_deg: ${data.default_azimuth_deg}
+    # cond_camera_distance: ${data.default_camera_distance}
+    guidance_scale: 3.0
+    min_step_percent: [50, 0.7, 0.3, 200]  # (start_iter, start_val, end_val, end_iter)
+    max_step_percent: [50, 0.98, 0.8, 200]
+
+  # num_inference_steps: 100
+
+  freq:
+    ref_only_steps: 0
+    guidance_eval: 0
 
 trainer:
   max_steps: 4000
@@ -67,7 +84,6 @@ trainer:
   limit_val_batches: 0
   enable_progress_bar: true
   precision: 32 
-
 checkpoint:
   save_last: true # save at each validation time
   save_top_k: -1

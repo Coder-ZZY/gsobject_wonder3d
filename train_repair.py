@@ -85,24 +85,33 @@ def main(args, extras) -> None:
         if handler.stream == sys.stderr:  # type: ignore
             handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
             handler.addFilter(ColoredFilter())
-
+    '''
+    加载配置文件
+    '''
     # parse YAML config to OmegaConf
     cfg: ExperimentConfig
     cfg = load_config(args.config, cli_args=extras, n_gpus=n_gpus)
-
     # set a different seed for each device
     pl.seed_everything(cfg.seed + get_rank(), workers=True)
-
+    '''
+    数据集加载
+    '''
     # pre load dataset for scene info
+    #dm = loo-datamodule
     dm = threestudio.find(cfg.data_type)(cfg.data)
+    #gt_ds = loo-dataset
     gt_ds = threestudio.find(cfg.dataset_type)(cfg.data, sparse_num=cfg.data.sparse_num)
     cfg.system.scene_extent = gt_ds.get_scene_extent()['radius'] # type: ignore
-
+    '''
+    系统加载
+    '''
     system: BaseSystem = threestudio.find(cfg.system_type)(
         cfg.system, resumed=cfg.resume is not None
     )
     system.set_save_dir(os.path.join(cfg.trial_dir, "save"))
-
+    '''
+    callback设定
+    '''
     callbacks = []
     if args.train:
         callbacks += [
@@ -118,7 +127,9 @@ def main(args, extras) -> None:
             ),
             CustomProgressBar(refresh_rate=1),
         ]
-
+    '''
+    训练
+    '''
     def write_to_text(file, lines):
         with open(file, "w") as f:
             for line in lines:
