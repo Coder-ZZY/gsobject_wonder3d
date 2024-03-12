@@ -174,17 +174,24 @@ if __name__=="__main__":
 
     # load the camera parameters
     # we assume that the camera parameters are stored in the data_dir
-    scene_info = sceneLoadTypeCallbacks["Wonder3D"](path = args.data_dir, eval = False, extra_opts=extra_opts) 
-    camlist = cameraList_from_camInfos(scene_info.train_cameras, 1.0, extra_opts)
+    if "wonder3d" in args.data_dir:
+        scene_info = sceneLoadTypeCallbacks["Wonder3D"](path = args.data_dir, eval = False, extra_opts=extra_opts)
+        w3ddata = True
+    else:
+        scene_info = sceneLoadTypeCallbacks["Colmap"](path = args.data_dir, eval = False, extra_opts=extra_opts)
+        w3ddata = False
     # NOTE :this dump use the file name, we dump the SceneInfo.pcd as the input.ply
+    camlist = []
     json_cams = []
+    if scene_info.train_cameras:
+        camlist.extend(scene_info.train_cameras)
     for id, cam in enumerate(camlist):
         json_cams.append(camera_to_JSON(id, cam))
-    with open(os.path.join("cameras.json"), 'w') as file:
+    with open(os.path.join(args.data_dir,"train_cameras.json"), 'w') as file:
         json.dump(json_cams, file)
-
+    camlist = cameraList_from_camInfos(scene_info.train_cameras, 1.0, extra_opts)
     # if sparse id is not zero, we only use given frames to construct the visual hull
-    if args.sparse_id >= 0:
+    if args.sparse_id >= 0 and not w3ddata:
         selected_id = np.loadtxt(os.path.join(args.data_dir, f"sparse_{str(args.sparse_id)}.txt"), dtype=np.int32)
         print("the sparse id is {}, with {} frames".format(args.sparse_id, len(selected_id)))
         assert args.sparse_id == len(selected_id)

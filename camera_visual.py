@@ -113,8 +113,8 @@ def main():
     parser.add_argument('-s','--source_path', type=str, default="", help='path to data')
     parser.add_argument('--vis_geo', action='store_true', help='visualize geometry')
     args = parser.parse_args()
-    if os.path.exists(os.path.join(args.source_path,'cameras.json')):
-        poses,intrinsics,image_size,positions = cameras_reader(os.path.join(args.source_path,'cameras.json'))
-        visualize_cameras(intrinsics,poses,img_size=image_size,positions=positions,geometry_file=os.path.join("visual_hull_full.ply"),geometry_type='pointcloud')
+    if os.path.exists(os.path.join(args.source_path,'train_cameras.json')):
+        poses,intrinsics,image_size,positions = cameras_reader(os.path.join(args.source_path,'train_cameras.json'))
+        visualize_cameras(intrinsics,poses,img_size=image_size,positions=positions,geometry_file=os.path.join("visual_hull.ply"),geometry_type='pointcloud')
 if __name__ == '__main__':
     main()

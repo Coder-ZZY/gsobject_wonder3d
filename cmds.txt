@@ -1,0 +1,9 @@
+#get visual hull
+CUDA_VISIBLE_DEVICES=2 python visual_hull.py --data_dir data/wonder3d/vase/ --reso 1 --not_vis
+#init train
+CUDA_VISIBLE_DEVICES=0 python train_gs.py -s data/wonder3d/vase/ -m output/gs_init/vase --sh_degree 2 --init_pcd_name visual_hull --white_background --random_background -r 1
+#loo train stage 1
+CUDA_VISIBLE_DEVICES=2 python leave_one_out_stage1.py -s data/wonder3d/vase -m output/gs_init/vase_loo -r 1 --sh_degree 2 --init_pcd_name visual_hull --white_background --random_background --data_type wonder3d
+
+#render
+python render.py -m output/gs_init/kitchen --sh_degree 2  --init_pcd_name visual_hull --white_background --render_path

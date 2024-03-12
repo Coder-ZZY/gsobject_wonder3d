@@ -35,6 +35,8 @@ def training(args, dataset, opt, pipe, testing_iterations, saving_iterations, ch
     tb_writer = prepare_output_and_logger(dataset)
     gaussians = GaussianModel(dataset.sh_degree)
     scene = Scene(dataset, gaussians, extra_opts=args)
+    if scene.data_type == "wonder3d":
+        args.sparse_view_num = 6
     # #save train images
     # train_cams = scene.getTrainCameras().copy()
     # for id,cam_info in enumerate(train_cams):

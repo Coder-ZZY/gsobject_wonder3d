@@ -45,16 +45,22 @@ class Scene:
 
         if os.path.exists(os.path.join(args.source_path, "sparse")): # type: ignore
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, extra_opts=extra_opts) # type: ignore
+            self.data_type = "colmap"
         elif os.path.exists(os.path.join(args.source_path, "transforms_alignz_train.json")): # type: ignore
             print("Found transforms_alignz_train.json file, assuming OpenIllumination data set!")
+            self.data_type = "others"
             scene_info = sceneLoadTypeCallbacks["OpenIllumination"](args.source_path, args.white_background, args.eval, extra_opts=extra_opts) # type: ignore
         elif os.path.exists(os.path.join(args.source_path, "transforms_train.json")): # type: ignore
+            self.data_type = "others"
             print("Found transforms_train.json file, assuming Blender data set!")
             scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval, extra_opts=extra_opts) # type: ignore
         elif os.path.exists(os.path.join(args.source_path, "hydrant", "frame_annotations.jgz")): # type: ignore
+            self.data_type = "others"
             scene_info = sceneLoadTypeCallbacks["CO3D"](args.source_path, extra_opts=extra_opts) # type: ignore
         elif "wonder3d" in args.source_path:
+            self.data_type = "wonder3d"
             print("Found wonder3d file, assuming Wonder3D data set!")
+            extra_opts.sparse_view_num = 6
             scene_info = sceneLoadTypeCallbacks["Wonder3D"](args.source_path, args.eval,extra_opts=extra_opts)
         else:
             assert False, "Could not recognize scene type!"

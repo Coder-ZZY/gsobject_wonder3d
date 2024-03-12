@@ -18,7 +18,7 @@ from utils.loss_utils import l1_loss, ssim, monodisp
 from utils.image_utils import psnr
 from gaussian_renderer import render
 from scene import Scene, GaussianModel
-
+from utils.console_utils import *
 try:
     from torch.utils.tensorboard.writer import SummaryWriter
     TENSORBOARD_FOUND = True
@@ -292,6 +292,7 @@ if __name__ == "__main__":
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[6000])
     parser.add_argument("--start_checkpoint", type=str, default = None)
+    parser.add_argument("--data_type", type=str, default="colmap")
     ### some exp args
     parser.add_argument("--sparse_view_num", type=int, default=-1, 
                     help="Use sparse view or dense view, if sparse_view_num > 0, use sparse view, \
@@ -303,13 +304,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
-
+    if args.data_type == "wonder3d":
+        args.sparse_view_num = 6
     assert args.sparse_view_num > 0, 'leave_one_out is for sparse view training'
-    assert os.path.exists(os.path.join(args.source_path, f"sparse_{args.sparse_view_num}.txt")), f"sparse_{args.sparse_view_num}.txt not found!"
-    assert os.path.exists(os.path.join(args.source_path, f"visual_hull_{args.sparse_view_num}.ply")), f"visual_hull_{args.sparse_view_num}.ply not found!"
-
-    ids = np.loadtxt(os.path.join(args.source_path, f"sparse_{args.sparse_view_num}.txt"), dtype=np.int32).tolist()
-
+    if args.data_type == "colmap":
+        assert os.path.exists(os.path.join(args.source_path, f"sparse_{args.sparse_view_num}.txt")) and args.data_type == "colmap", f"sparse_{args.sparse_view_num}.txt not found!"
+        assert os.path.exists(os.path.join(args.source_path, f"visual_hull_{args.sparse_view_num}.ply")), f"visual_hull_{args.sparse_view_num}.ply not found!"
+        ids = np.loadtxt(os.path.join(args.source_path, f"sparse_{args.sparse_view_num}.txt"), dtype=np.int32).tolist()
+    elif args.data_type == "wonder3d":
+        assert os.path.exists(os.path.join(args.source_path, f"visual_hull.ply")), f"visual_hull.ply not found!"
+        ids = list(range(6))
+    else:
+        print_error(f"Data type:{args.data_type} not supported!")
     train_3dgs(args, ids)
 
     # All done

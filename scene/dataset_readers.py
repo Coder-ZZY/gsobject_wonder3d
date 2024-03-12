@@ -343,12 +343,8 @@ def readWonder3DSceneInfo(path,eval,llffhold=8,extra_opts=None,extension=".png",
     ply_path = ""
     if hasattr(extra_opts, 'sparse_view_num') and extra_opts.sparse_view_num > 0: # means sparse setting
         assert eval == False
-        assert osp.exists(osp.join(path, f"sparse_{str(extra_opts.sparse_view_num)}.txt")), "sparse_id.txt not found!"
-        ids = np.loadtxt(osp.join(path, f"sparse_{str(extra_opts.sparse_view_num)}.txt"), dtype=np.int32)
-        ids_test = np.loadtxt(osp.join(path, f"sparse_test.txt"), dtype=np.int32)
-        test_cam_infos = [train_cam_infos[i] for i in ids_test]
-        train_cam_infos = [train_cam_infos[i] for i in ids]
-        print("Sparse view, only {} images are used for training, others are used for eval.".format(len(ids)))
+        assert extra_opts.sparse_view_num == 6, "wonder3d sparse_view_num should be 6"
+        test_cam_infos = train_cam_infos
 
     # NOTE in sparse condition, we may use random points to initialize the gaussians
     if hasattr(extra_opts, 'init_pcd_name'):
@@ -358,6 +354,7 @@ def readWonder3DSceneInfo(path,eval,llffhold=8,extra_opts=None,extension=".png",
             raise NotImplementedError
         else:
             # use specific pointcloud, direct load it
+            print_info("use visual hull point cloud")
             ply_path = osp.join(path, extra_opts.init_pcd_name if extra_opts.init_pcd_name.endswith(".ply") else extra_opts.init_pcd_name + ".ply")
             pcd = fetchPly(osp.join(path, extra_opts.init_pcd_name if extra_opts.init_pcd_name.endswith(".ply") 
                                         else extra_opts.init_pcd_name + ".ply"))
